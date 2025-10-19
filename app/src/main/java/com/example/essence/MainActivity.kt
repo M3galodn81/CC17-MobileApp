@@ -49,12 +49,17 @@ fun AppNavigation() {
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Routes.LOGIN, // Start the app at the Login screen
+            startDestination = Routes.REGISTRATION, // Start the app at the Login screen
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Routes.LOGIN) {
                 // Using LoginScreen
                 LoginScreen(navController = navController)
+            }
+
+            composable(Routes.REGISTRATION) {
+                // Using LoginScreen
+                RegistrationScreen(navController = navController)
             }
             composable(Routes.DASHBOARD) {
                 // Using DashboardScreen

@@ -1,5 +1,8 @@
 package com.example.essence
 
+import android.view.ContextThemeWrapper
+import androidx.compose.ui.viewinterop.AndroidView
+import android.widget.CalendarView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,6 +34,7 @@ import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import kotlinx.coroutines.launch
@@ -188,6 +192,8 @@ fun DashboardContent() {
 
 @Composable
 fun ScheduleContent() {
+    var selectedDate by remember { mutableStateOf("") }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -195,11 +201,35 @@ fun ScheduleContent() {
             .verticalScroll(rememberScrollState())
 
     ) {
+        CalendarWidget{
+            year, month, day ->
+            selectedDate = "$year-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}"
+        }
         repeat(50) {
             Text("Schedule entry #$it", color = MaterialTheme.colorScheme.onBackground)
         }
     }
 }
+
+
+
+@Composable
+fun CalendarWidget(onDateChange: (year: Int, month: Int, day: Int) -> Unit) {
+    val backgroundColor = MaterialTheme.colorScheme.secondary
+
+    AndroidView(
+        factory = { context ->
+            CalendarView(ContextThemeWrapper(context, R.style.CustomCalendarView)).apply {
+                setBackgroundColor(backgroundColor.toArgb())
+                setOnDateChangeListener { _, year, month, day ->
+                    onDateChange(year, month + 1, day)
+                }
+            }
+        },
+        modifier = Modifier.fillMaxWidth()
+    )
+}
+
 
 @Composable
 fun PayslipContent() {
