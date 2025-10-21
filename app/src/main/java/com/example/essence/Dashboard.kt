@@ -65,6 +65,7 @@ fun DashboardScreen(modifier: Modifier) {
         }
     ) {
         Column(modifier = modifier.fillMaxSize()) {
+
             TopBar(
                 name = selectedScreen.name,
                 onMenuClick = {
@@ -111,6 +112,7 @@ fun TopBar(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceAround
     ) {
+
         IconOnlyFlatButton( onMenuClick,
             Modifier
                 .fillMaxHeight(),
@@ -219,7 +221,7 @@ fun CalendarWidget(onDateChange: (year: Int, month: Int, day: Int) -> Unit) {
 
     AndroidView(
         factory = { context ->
-            CalendarView(ContextThemeWrapper(context, R.style.CustomCalendarView)).apply {
+            CalendarView(context).apply {
                 setBackgroundColor(backgroundColor.toArgb())
                 setOnDateChangeListener { _, year, month, day ->
                     onDateChange(year, month + 1, day)

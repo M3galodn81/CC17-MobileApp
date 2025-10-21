@@ -31,7 +31,7 @@ fun NavigationDrawerContent(
         Text("ESSence", modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.titleLarge)
         HorizontalDivider()
 
-        Text("Section 1", modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.titleMedium)
+        Text("General", modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.titleMedium)
         NavigationDrawerItem(
             label = { Text("Dashboard") },
             selected = false,

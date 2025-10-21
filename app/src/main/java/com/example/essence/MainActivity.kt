@@ -40,16 +40,21 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+// VALUES
+val notificationCount = 3
+
+
 // --- Navigation Composable (The core of the multi-screen app) ---
 
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
 
+
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Routes.REGISTRATION, // Start the app at the Login screen
+            startDestination = Routes.DASHBOARD, // Start the app at the Login screen
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Routes.LOGIN) {
