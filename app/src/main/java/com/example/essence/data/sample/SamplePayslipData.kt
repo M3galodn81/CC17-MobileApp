@@ -10,6 +10,27 @@ import java.util.UUID
 val payslips = listOf(
     PayslipData(
         id = UUID.randomUUID().toString(),
+        payStartDate = LocalDate.of(2025, 11, 1),
+        payEndDate = LocalDate.of(2025, 11, 30),
+        payDate = LocalDate.of(2025, 12, 5),
+        basicPay = 26000.0,
+        overtimePay = 2000.0,
+        holidayPay = 1200.0,
+        allowances = 2000.0,
+        bonuses = 1000.0,
+        tax = 2500.0,
+        sss = 600.0,
+        philHealth = 450.0,
+        pagIbig = 200.0,
+        otherDeductions = 1000.0,
+        remarks = "Regular pay + performance bonus",
+        employeeId = "EMP001",
+        employeeName = "Juan Dela Cruz",
+        department = "Finance",
+        position = "Accountant"
+    ),
+    PayslipData(
+        id = UUID.randomUUID().toString(),
         payStartDate = LocalDate.of(2025, 10, 1),
         payEndDate = LocalDate.of(2025, 10, 31),
         payDate = LocalDate.of(2025, 11, 5),

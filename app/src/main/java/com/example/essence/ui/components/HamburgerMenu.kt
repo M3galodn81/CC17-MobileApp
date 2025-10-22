@@ -1,5 +1,6 @@
 package com.example.essence.ui.components
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -11,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.example.essence.CRASH_COUNTER
 import com.example.essence.MainActivity
 import com.example.essence.R
 import com.example.essence.ui.screens.Screen
@@ -63,16 +65,16 @@ fun NavigationDrawerContent(
 
         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
-        Text("Section 2", modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.titleMedium)
+        Text("Developer Tools", modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.titleMedium)
         NavigationDrawerItem(
-            label = { Text("Settings") },
+            label = { Text("Crash Counter") },
             selected = false,
             icon = { Icon(Icons.Outlined.Settings, contentDescription = null) },
-            badge = { Text("20") }, // Placeholder
-            onClick = { /* Handle click */ }
+            badge = { Text("$CRASH_COUNTER") }, // Placeholder
+            onClick = { Toast.makeText(context, "Yes, I somehow crash it since Nov. 31 doesn't exist", Toast.LENGTH_SHORT).show()}
         )
         NavigationDrawerItem(
-            label = { Text("Help and feedback") },
+            label = { Text("Notification Test") },
             selected = false,
             icon = { Icon(Icons.Outlined.Settings, contentDescription = null) },
             onClick = { onClose()

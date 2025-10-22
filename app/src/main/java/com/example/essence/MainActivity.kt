@@ -1,7 +1,5 @@
 package com.example.essence
 
-
-
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -31,6 +29,9 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat.getSystemService
 
 
+// VALUES
+var notificationCount = 789
+const val CRASH_COUNTER = 1
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -73,12 +74,7 @@ class MainActivity : ComponentActivity() {
 
 }
 
-// VALUES
-val notificationCount = 789
-
-
 // --- Navigation Composable (The core of the multi-screen app) ---
-
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
