@@ -1,15 +1,12 @@
-package com.example.essence.ui.components
+package com.example.essence.ui.components.dashboard
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -31,7 +28,8 @@ import com.example.essence.ui.screens.Screen
 fun BottomBar(
     modifier: Modifier = Modifier,
     selectedScreen: Screen,
-    onItemSelected: (Screen) -> Unit
+    onItemSelected: (Screen) -> Unit,
+    isLoading: Boolean = false
 ) {
     Row(
         modifier = modifier
@@ -47,7 +45,8 @@ fun BottomBar(
             icon = R.drawable.icon_dashboard,
             isSelected = selectedScreen == Screen.Dashboard,
             onClick = onItemSelected,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
+            isLoading = isLoading,
         )
         BottomBarItem(
             screen = Screen.Schedule,
@@ -55,7 +54,8 @@ fun BottomBar(
             icon = R.drawable.icon_leave,
             isSelected = selectedScreen == Screen.Schedule,
             onClick = onItemSelected,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
+            isLoading = isLoading,
         )
         BottomBarItem(
             screen = Screen.Payslip,
@@ -63,7 +63,8 @@ fun BottomBar(
             icon = R.drawable.icon_payslip,
             isSelected = selectedScreen == Screen.Payslip,
             onClick = onItemSelected,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
+            isLoading = isLoading,
         )
         BottomBarItem(
             screen = Screen.Profile,
@@ -71,7 +72,8 @@ fun BottomBar(
             icon = R.drawable.icon_profile,
             isSelected = selectedScreen == Screen.Profile,
             onClick = onItemSelected,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
+            isLoading = isLoading,
         )
     }
 }
@@ -84,7 +86,8 @@ fun BottomBarItem(
     icon: Int,
     isSelected: Boolean,
     onClick: (Screen) -> Unit,
-    modifier: Modifier
+    modifier: Modifier,
+    isLoading: Boolean,
 ) {
     val selectedColor = MaterialTheme.colorScheme.primary
     val unselectedColor = MaterialTheme.colorScheme.onSurfaceVariant
@@ -92,7 +95,7 @@ fun BottomBarItem(
     Column(
         modifier = modifier
             .fillMaxHeight()
-            .clickable { onClick(screen) }
+            .clickable(enabled = !isLoading) { onClick(screen) }
             .background(
                 if (isSelected) selectedColor.copy(alpha = 0.1f) else Color.Transparent,
                 RoundedCornerShape(0.dp)

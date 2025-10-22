@@ -12,11 +12,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.essence.data.model.PayslipData
-import com.example.essence.ui.components.PayslipCard
-import com.example.essence.data.sample.payslips
-import com.example.essence.functions.formatPayPeriod
-import com.example.essence.ui.components.charts.PayslipLineChart
-import com.example.essence.ui.components.charts.PayslipPieChart
+import com.example.essence.ui.components.payslip.DeductionsChart
+import com.example.essence.ui.components.payslip.GrossPayChart
+import com.example.essence.ui.components.payslip.PayslipSummaryCard
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -25,13 +23,12 @@ fun PayslipDetailsScreen(
     payslipData: PayslipData
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState()),
+        modifier = screenModifier(),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        PayslipPieChart(payslipData)
+        PayslipSummaryCard(payslipData)
+        GrossPayChart(payslipData)
+        DeductionsChart(payslipData)
 
     }
 }

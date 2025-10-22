@@ -4,15 +4,10 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -23,29 +18,22 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Email
-import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.rememberCoroutineScope
 import com.example.essence.ui.components.NavigationDrawerContent
-import com.example.essence.R
 import com.example.essence.data.model.PayslipData
 import com.example.essence.functions.formatTitleCaseWithSpaces
-import com.example.essence.notificationCount
-import com.example.essence.ui.components.BadgeIconOnlyFlatButton
-import com.example.essence.ui.components.BottomBar
-import com.example.essence.ui.components.IconOnlyFlatButton
-import com.example.essence.ui.components.TopBar
-import com.example.essence.ui.components.TopIconFlatButton
+import com.example.essence.ui.components.dashboard.BottomBar
+import com.example.essence.ui.components.dashboard.TopBar
 import kotlinx.coroutines.launch
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
+import androidx.compose.ui.Alignment
+import com.example.essence.ui.components.dashboar.GlobalLoadingOverlay
 
 enum class Screen { Dashboard,
                     Schedule,
@@ -53,14 +41,37 @@ enum class Screen { Dashboard,
                     Profile,
                     Notification,  }
 
+@Composable
+fun screenModifier(): Modifier {
+    return Modifier
+        .fillMaxSize()
+        .padding(16.dp)
+        .verticalScroll(rememberScrollState())
+}
+
+
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DashboardScreen(modifier: Modifier) {
+    // Check current screen
     var selectedScreen by remember { mutableStateOf(Screen.Dashboard) }
     var selectedPayslipData by remember { mutableStateOf<PayslipData?>(null) }
 
+    // Check drawer status
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    var isLoading by remember { mutableStateOf(false) }
+
+    fun switchScreen(screen: Screen) {
+        if (isLoading || selectedScreen == screen) return
+
+        scope.launch {
+            isLoading = true
+            kotlinx.coroutines.delay(500) // simulate loading delay (optional)
+            selectedScreen = screen
+            isLoading = false
+        }
+    }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -73,7 +84,7 @@ fun DashboardScreen(modifier: Modifier) {
                 NavigationDrawerContent(
                     onClose = { scope.launch { drawerState.close() } },
                     onItemSelected = { screen ->
-                        selectedScreen = screen
+                        switchScreen(screen)
                     }
                 )
             }
@@ -83,16 +94,18 @@ fun DashboardScreen(modifier: Modifier) {
 
             TopBar(
                 name = formatTitleCaseWithSpaces(selectedScreen.name),
-                onMenuClick = {
-                    if (selectedScreen == Screen.PayslipDetails) null else {
+                onMenuClick =
+                    if (selectedScreen == Screen.PayslipDetails)
+                        null
+                    else {
                         { scope.launch { drawerState.open() } }
                     }
-                },
+                ,
                 onNotificationClick = {
-                    selectedScreen = Screen.Notification
+                    switchScreen(Screen.Notification)
                 },
                 onBackClick = if (selectedScreen == Screen.PayslipDetails) {
-                    { selectedScreen = Screen.Payslip }
+                    { switchScreen(Screen.Payslip) }
                 } else null,
             )
 
@@ -115,7 +128,7 @@ fun DashboardScreen(modifier: Modifier) {
                         Screen.Payslip -> PayslipContent(
                             onPayslipSelected = {
                                 selectedPayslipData = it
-                                selectedScreen = Screen.PayslipDetails
+                                switchScreen(Screen.PayslipDetails)
                             }
                         )
                         Screen.PayslipDetails -> {
@@ -127,9 +140,18 @@ fun DashboardScreen(modifier: Modifier) {
                         Screen.Notification -> NotificationContent()
                     }
                 }
+                if (isLoading) {
+                    GlobalLoadingOverlay()
+                }
             }
 
-            BottomBar(onItemSelected = { selectedScreen = it }, selectedScreen = selectedScreen)
+            BottomBar(
+                selectedScreen = selectedScreen,
+                isLoading = isLoading,
+                onItemSelected = { screen ->
+                    switchScreen(screen)
+                }
+            )
         }
     }
 }
@@ -137,10 +159,7 @@ fun DashboardScreen(modifier: Modifier) {
 @Composable
 fun DashboardContent() {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState())
+        modifier = screenModifier()
     ) {
         repeat(50) {
             Text("Dashboard item #$it", color = MaterialTheme.colorScheme.onBackground)

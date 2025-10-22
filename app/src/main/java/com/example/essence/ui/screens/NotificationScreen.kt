@@ -14,10 +14,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun NotificationContent() {
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .padding(16.dp)
-        .verticalScroll(rememberScrollState())
+    Column(modifier = screenModifier()
     ) {
         Text("Notifications")
         repeat(35) {

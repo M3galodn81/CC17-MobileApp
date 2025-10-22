@@ -1,4 +1,4 @@
-package com.example.essence.ui.components.charts
+package com.example.essence.ui.components.payslip
 
 import android.os.Build
 import androidx.annotation.RequiresApi

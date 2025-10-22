@@ -22,10 +22,21 @@ import com.example.essence.ui.screens.RegistrationScreen
 import com.example.essence.ui.screens.Routes
 import java.time.LocalDate
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
+import android.os.Build
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat.getSystemService
+
+
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        createNotificationChannel()
         setContent {
             ESSenceTheme {
                 // The NavController will manage switching between the Login and Dashboard screens
@@ -33,6 +44,33 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val name = "Test Notifications"
+            val descriptionText = "Channel for test notifications"
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val channel = NotificationChannel("test_channel", name, importance).apply {
+                description = descriptionText
+            }
+            val notificationManager: NotificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+    }
+    fun sendTestNotification() {
+        val builder = NotificationCompat.Builder(this, "test_channel")
+            .setSmallIcon(R.drawable.ic_launcher_foreground) // Replace with your own icon
+            .setContentTitle("Test Notification")
+            .setContentText("This is a test notification from ESSence.")
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+
+        with(NotificationManagerCompat.from(this)) {
+            notify(1001, builder.build())
+        }
+    }
+
+
 }
 
 // VALUES

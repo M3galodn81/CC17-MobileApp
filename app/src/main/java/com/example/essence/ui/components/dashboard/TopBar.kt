@@ -1,4 +1,4 @@
-package com.example.essence.ui.components
+package com.example.essence.ui.components.dashboard
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material3.MaterialTheme
@@ -20,12 +19,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.essence.notificationCount
+import com.example.essence.ui.components.BadgeIconOnlyFlatButton
+import com.example.essence.ui.components.IconOnlyFlatButton
 
 @Composable
 fun TopBar(
     name: String,
     modifier: Modifier = Modifier,
-    onMenuClick: () -> Unit,
+    onMenuClick: (() -> Unit)? = null,
     onBackClick: (() -> Unit)? = null,
     onNotificationClick: () -> Unit
 )
@@ -49,7 +50,7 @@ fun TopBar(
         } else {
             // Default menu button
             IconOnlyFlatButton(
-                {onMenuClick?.invoke()},
+                { onMenuClick?.invoke() },
                 modifier.fillMaxHeight(),
                 Icons.Outlined.Menu,
             )

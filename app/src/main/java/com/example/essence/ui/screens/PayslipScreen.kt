@@ -12,10 +12,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.essence.data.model.PayslipData
-import com.example.essence.ui.components.PayslipCard
+import com.example.essence.ui.components.payslip.PayslipCard
 import com.example.essence.data.sample.payslips
 import com.example.essence.functions.formatPayPeriod
-import com.example.essence.ui.components.charts.PayslipLineChart
+import com.example.essence.ui.components.payslip.PayslipLineChart
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -23,10 +23,7 @@ import com.example.essence.ui.components.charts.PayslipLineChart
 fun PayslipContent(onPayslipSelected: (PayslipData) -> Unit) {
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState()),
+        modifier = screenModifier(),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         PayslipLineChart(payslips)

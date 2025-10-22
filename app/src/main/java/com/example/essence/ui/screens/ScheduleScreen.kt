@@ -25,11 +25,7 @@ fun ScheduleContent() {
     var selectedDate by remember { mutableStateOf("") }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState())
-
+        modifier = screenModifier()
     ) {
         CalendarWidget{
                 year, month, day ->
@@ -40,8 +36,6 @@ fun ScheduleContent() {
         }
     }
 }
-
-
 
 @Composable
 fun CalendarWidget(onDateChange: (year: Int, month: Int, day: Int) -> Unit) {

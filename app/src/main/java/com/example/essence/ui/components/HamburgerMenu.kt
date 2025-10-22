@@ -8,8 +8,10 @@ import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.example.essence.MainActivity
 import com.example.essence.R
 import com.example.essence.ui.screens.Screen
 
@@ -18,6 +20,8 @@ fun NavigationDrawerContent(
     onClose: () -> Unit,
     onItemSelected: (Screen) -> Unit
 ) {
+    val context = LocalContext.current
+
     Column(
         modifier = Modifier.padding(horizontal = 16.dp)
             .width(304.dp)
@@ -71,7 +75,10 @@ fun NavigationDrawerContent(
             label = { Text("Help and feedback") },
             selected = false,
             icon = { Icon(Icons.Outlined.Settings, contentDescription = null) },
-            onClick = { /* Handle click */ },
+            onClick = { onClose()
+                if (context is MainActivity) {
+                    context.sendTestNotification()
+                } },
         )
         Spacer(Modifier.height(12.dp))
     }

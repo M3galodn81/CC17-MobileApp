@@ -14,10 +14,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun ProfileContent() {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState())
+        modifier = screenModifier()
     ) {
         Text("Profile screen")
         repeat(35) {
