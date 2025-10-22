@@ -20,6 +20,7 @@ import com.example.essence.ui.screens.DashboardScreen
 import com.example.essence.ui.screens.LoginScreen
 import com.example.essence.ui.screens.RegistrationScreen
 import com.example.essence.ui.screens.Routes
+import java.time.LocalDate
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

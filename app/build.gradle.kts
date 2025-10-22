@@ -30,6 +30,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+
     }
     kotlinOptions {
         jvmTarget = "11"
@@ -37,6 +38,8 @@ android {
     buildFeatures {
         compose = true
     }
+
+
 }
 
 dependencies {
@@ -53,6 +56,10 @@ dependencies {
     implementation(libs.androidx.animation.core.lint)
     implementation(libs.protolite.well.known.types)
     implementation(libs.androidx.foundation)
+    implementation(libs.androidx.core.i18n)
+
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.2")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

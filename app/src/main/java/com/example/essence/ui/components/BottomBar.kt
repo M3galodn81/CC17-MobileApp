@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -34,7 +35,7 @@ fun BottomBar(
 ) {
     Row(
         modifier = modifier
-            .fillMaxWidth()
+            .wrapContentHeight()
             .height(64.dp)
             .background(MaterialTheme.colorScheme.surface),
         horizontalArrangement = Arrangement.SpaceEvenly,
