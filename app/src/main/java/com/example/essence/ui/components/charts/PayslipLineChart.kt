@@ -1,7 +1,7 @@
 package com.example.essence.ui.components.charts
 
-import android.os.Build // <-- Was unused, now needed
-import androidx.annotation.RequiresApi // <-- Was unused, now needed
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,21 +24,19 @@ import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-// 1. FIX: Removed incorrect import
-// import androidx.core.i18n.DateTimeFormatter
 import com.example.essence.data.model.PayslipData
-// 2. FIX: Added the correct java.time import
 import java.time.format.DateTimeFormatter
+import kotlin.math.ceil
+import kotlin.math.floor
+import kotlin.math.log10
+import kotlin.math.pow
 import kotlin.math.roundToInt
 
-// 3. FIX: Added API requirement for java.time.format.DateTimeFormatter
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun PayslipLineChart(payslips: List<PayslipData>) {
-    // This sorting is a good improvement!
     val data = payslips.sortedBy { it.payEndDate }
 
-    // 4. FIX: Re-added string cleaning before .toFloat() to prevent crash
     val netPayValues = data.map {
         it.netPay.toFloat()
     }
@@ -56,15 +54,26 @@ fun PayslipLineChart(payslips: List<PayslipData>) {
         )
     }
 
-    // This now works because of the fixed import
     val monthFormatter = DateTimeFormatter.ofPattern("MMM")
     val xLabels = data.map { it.payStartDate.format(monthFormatter) }
 
-    val maxPayLabel = "₱${(maxPay / 1000f).roundToInt()}K"
-    val minPayLabel = "₱${(minPay / 1000f).roundToInt()}K"
+    // --- NEW: Guideline 1, 2, 4 ---
+    // Dynamically calculate a "nice" axis scale and step
+    val axisDetails = remember(minPay, maxPay) {
+        calculateNiceAxis(minPay, maxPay)
+    }
+    val minAxis = axisDetails.minAxis
+    val maxAxis = axisDetails.maxAxis
+    val niceStep = axisDetails.step
+    // --- End NEW ---
 
     val axisColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
     val axisStrokeWidth = with(LocalDensity.current) { 1.dp.toPx() }
+
+    // --- NEW: Guideline 5 ---
+    // A separate, fainter color for the gridlines
+    val gridColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
+
 
     Column(
         modifier = Modifier
@@ -91,7 +100,9 @@ fun PayslipLineChart(payslips: List<PayslipData>) {
 
             val height = size.height
             val width = size.width
-            val valueRange = (maxPay - minPay).takeIf { it > 0f } ?: 1f
+
+            // --- MODIFIED: Use the new rounded axis range ---
+            val axisValueRange = (maxAxis - minAxis).takeIf { it > 0f } ?: 1f
 
             val points = netPayValues.mapIndexed { index, value ->
                 val x = if (netPayValues.size > 1) {
@@ -99,18 +110,19 @@ fun PayslipLineChart(payslips: List<PayslipData>) {
                 } else {
                     width / 2f
                 }
-                val y = height - ((value - minPay) / valueRange * height)
+                // --- MODIFIED: Calculate Y based on new minAxis and axisValueRange ---
+                val y = height - ((value - minAxis) / axisValueRange * height)
                 Offset(x, y)
             }
 
-            // Y-axis
+            // --- Main Y-axis line (same) ---
             drawLine(
                 color = axisColor,
                 start = Offset(0f, 0f),
                 end = Offset(0f, height),
                 strokeWidth = axisStrokeWidth
             )
-            // X-axis
+            // --- Main X-axis line (same) ---
             drawLine(
                 color = axisColor,
                 start = Offset(0f, height),
@@ -118,27 +130,43 @@ fun PayslipLineChart(payslips: List<PayslipData>) {
                 strokeWidth = axisStrokeWidth
             )
 
-            // Y-axis labels
-            val maxLabelResult = textMeasurer.measure(AnnotatedString(maxPayLabel), labelStyle)
-            val minLabelResult = textMeasurer.measure(AnnotatedString(minPayLabel), labelStyle)
 
-            drawText(
-                textLayoutResult = maxLabelResult,
-                topLeft = Offset(
-                    x = -maxLabelResult.size.width - 4.dp.toPx(),
-                    y = 0f - (maxLabelResult.size.height / 2)
+            // --- NEW: Y-Axis Labels & Gridlines (Guidelines 2, 3, 5) ---
+            // Replaces the old static min/mid/max logic
+            val tickValues = (minAxis.toInt()..maxAxis.toInt() step niceStep.toInt())
+
+            tickValues.forEach { tickValue ->
+                // Calculate Y position for this tick
+                val tickY = height - ((tickValue - minAxis) / axisValueRange * height)
+
+                // Draw Gridline (Guideline 5)
+                // (Don't draw for minAxis, as it's the X-axis itself)
+                if (tickValue != minAxis.toInt()) {
+                    drawLine(
+                        color = gridColor,
+                        start = Offset(0f, tickY),
+                        end = Offset(width, tickY),
+                        strokeWidth = axisStrokeWidth // 1.dp
+                    )
+                }
+
+                // Format and Measure Label (Guideline 3)
+                val label = "₱${(tickValue / 1000f).roundToInt()}K"
+                val labelResult = textMeasurer.measure(AnnotatedString(label), labelStyle)
+
+                // Draw Label
+                drawText(
+                    textLayoutResult = labelResult,
+                    topLeft = Offset(
+                        x = -labelResult.size.width - 4.dp.toPx(),
+                        y = tickY - (labelResult.size.height / 2) // Center on the line
+                    )
                 )
-            )
+            }
+            // --- End NEW ---
 
-            drawText(
-                textLayoutResult = minLabelResult,
-                topLeft = Offset(
-                    x = -minLabelResult.size.width - 4.dp.toPx(),
-                    y = height - (minLabelResult.size.height / 2)
-                )
-            )
 
-            // X-axis labels
+            // --- X-axis labels (same as before) ---
             points.forEachIndexed { index, point ->
                 val label = xLabels[index]
                 val labelResult = textMeasurer.measure(AnnotatedString(label), labelStyle)
@@ -151,7 +179,7 @@ fun PayslipLineChart(payslips: List<PayslipData>) {
                 )
             }
 
-            // Line path
+            // --- Line path (same as before) ---
             if (points.size > 1) {
                 val path = Path().apply {
                     moveTo(points.first().x, points.first().y)
@@ -166,7 +194,7 @@ fun PayslipLineChart(payslips: List<PayslipData>) {
                 )
             }
 
-            // Data points
+            // --- Data points (same as before) ---
             points.forEach {
                 drawCircle(
                     color = lineColor,
@@ -181,4 +209,44 @@ fun PayslipLineChart(payslips: List<PayslipData>) {
             }
         }
     }
+}
+
+/**
+ * Helper data class to hold the calculated axis properties.
+ */
+private data class AxisDetails(
+    val minAxis: Float,
+    val maxAxis: Float,
+    val step: Float
+)
+
+/**
+ * Implements Guidelines 1, 2, and 4.
+ * Calculates a "nice" min, max, and step for the Y-axis
+ * to ensure rounded, evenly-spaced labels.
+ */
+private fun calculateNiceAxis(minPay: Float, maxPay: Float): AxisDetails {
+    // 1. Calculate the raw data range
+    val dataRange = (maxPay - minPay).takeIf { it > 0f } ?: 1000f
+
+    // 2. Aim for 4-6 ticks (Guideline 4)
+    val targetTickCount = 5
+    val roughStep = dataRange / (targetTickCount - 1)
+
+    // 3. Find the nearest "nice" step (1, 2, 5, 10, 20, 50, 100, 1000...)
+    val magnitude = 10f.pow(floor(log10(roughStep)))
+    val residual = roughStep / magnitude
+
+    val niceStep = when {
+        residual <= 1f -> 1f * magnitude
+        residual <= 2f -> 2f * magnitude
+        residual <= 5f -> 5f * magnitude
+        else -> 10f * magnitude
+    }
+
+    // 4. Calculate new min/max based on the nice step (Guideline 1 & 2)
+    val minAxis = floor(minPay / niceStep) * niceStep
+    val maxAxis = ceil(maxPay / niceStep) * niceStep
+
+    return AxisDetails(minAxis, maxAxis, niceStep)
 }

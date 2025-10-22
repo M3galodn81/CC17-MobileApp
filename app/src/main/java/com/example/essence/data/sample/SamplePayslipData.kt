@@ -1,9 +1,12 @@
 package com.example.essence.data.sample
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import com.example.essence.data.model.PayslipData
 import java.time.LocalDate
 import java.util.UUID
 
+@RequiresApi(Build.VERSION_CODES.O)
 val payslips = listOf(
     PayslipData(
         id = UUID.randomUUID().toString(),
@@ -96,6 +99,27 @@ val payslips = listOf(
         payDate = LocalDate.of(2025, 7, 5),
         basicPay = 24000.0,
         overtimePay = 1200.0,
+        holidayPay = 800.0,
+        allowances = 1800.0,
+        bonuses = 0.0,
+        tax = 2250.0,
+        sss = 600.0,
+        philHealth = 450.0,
+        pagIbig = 200.0,
+        otherDeductions = 150.0,
+        remarks = "Regular pay",
+        employeeId = "EMP001",
+        employeeName = "Juan Dela Cruz",
+        department = "Finance",
+        position = "Accountant"
+    ),
+    PayslipData(
+        id = UUID.randomUUID().toString(),
+        payStartDate = LocalDate.of(2025, 5, 21),
+        payEndDate = LocalDate.of(2025, 5, 31),
+        payDate = LocalDate.of(2025, 6, 5),
+        basicPay = 24000.0/3,
+        overtimePay = 000.0,
         holidayPay = 800.0,
         allowances = 1800.0,
         bonuses = 0.0,

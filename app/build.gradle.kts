@@ -59,6 +59,7 @@ dependencies {
     implementation(libs.androidx.core.i18n)
 
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.2")
+    implementation("androidx.compose.animation:animation:1.9.3")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

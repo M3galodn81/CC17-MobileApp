@@ -16,12 +16,14 @@ import com.example.essence.ui.components.PayslipCard
 import com.example.essence.data.sample.payslips
 import com.example.essence.functions.formatPayPeriod
 import com.example.essence.ui.components.charts.PayslipLineChart
+import com.example.essence.ui.components.charts.PayslipPieChart
 
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun PayslipContent(onPayslipSelected: (PayslipData) -> Unit) {
-
+fun PayslipDetailsScreen(
+    payslipData: PayslipData
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -29,18 +31,7 @@ fun PayslipContent(onPayslipSelected: (PayslipData) -> Unit) {
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        PayslipLineChart(payslips)
-
-        payslips.forEach { payslip ->
-            PayslipCard(
-                payPeriod = formatPayPeriod(payslip.payStartDate,payslip.payEndDate),
-                grossPay = "₱${"%,.2f".format(payslip.totalEarnings)}",
-                deductions = "₱${"%,.2f".format(payslip.totalDeductions)}",
-                netPay = "₱${"%,.2f".format(payslip.netPay)}",
-                onViewDetails = { onPayslipSelected(payslip)
-                }
-            )
-        }
+        PayslipPieChart(payslipData)
 
     }
 }

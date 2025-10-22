@@ -17,6 +17,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,7 +32,8 @@ fun PayslipCard(
     payPeriod: String = "Oct 1 - Oct 15, 2025",
     grossPay: String = "₱25,000",
     deductions: String = "₱2,000",
-    netPay: String = "₱23,000"
+    netPay: String = "₱23,000",
+    onViewDetails: (() -> Unit)? = null
 ) {
     Card(
         colors = CardDefaults.cardColors(
@@ -87,13 +89,17 @@ fun PayslipCard(
                 }
             }
 
-            // Bottom: View details link
-            Text(
-                text = "View Details",
-                color = MaterialTheme.colorScheme.primary,
-                fontSize = 12.sp,
+
+            TextButton(
+                onClick = { onViewDetails?.invoke() },
                 modifier = Modifier.align(Alignment.End)
-            )
+            ) {
+                Text(
+                    text = "View Details",
+                    color = MaterialTheme.colorScheme.primary,
+                    fontSize = 12.sp,
+                )
+            }
         }
     }
 }

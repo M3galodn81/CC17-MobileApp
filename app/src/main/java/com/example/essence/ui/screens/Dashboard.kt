@@ -1,5 +1,8 @@
 package com.example.essence.ui.screens
 
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,6 +35,8 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.rememberCoroutineScope
 import com.example.essence.ui.components.NavigationDrawerContent
 import com.example.essence.R
+import com.example.essence.data.model.PayslipData
+import com.example.essence.functions.formatTitleCaseWithSpaces
 import com.example.essence.notificationCount
 import com.example.essence.ui.components.BadgeIconOnlyFlatButton
 import com.example.essence.ui.components.BottomBar
@@ -39,12 +44,21 @@ import com.example.essence.ui.components.IconOnlyFlatButton
 import com.example.essence.ui.components.TopBar
 import com.example.essence.ui.components.TopIconFlatButton
 import kotlinx.coroutines.launch
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 
-enum class Screen { Dashboard, Schedule, Payslip, Profile, Notification, Menu }
+enum class Screen { Dashboard,
+                    Schedule,
+                    Payslip, PayslipDetails,
+                    Profile,
+                    Notification,  }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DashboardScreen(modifier: Modifier) {
     var selectedScreen by remember { mutableStateOf(Screen.Dashboard) }
+    var selectedPayslipData by remember { mutableStateOf<PayslipData?>(null) }
+
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
@@ -68,13 +82,18 @@ fun DashboardScreen(modifier: Modifier) {
         Column(modifier = modifier.fillMaxSize()) {
 
             TopBar(
-                name = selectedScreen.name,
+                name = formatTitleCaseWithSpaces(selectedScreen.name),
                 onMenuClick = {
-                    scope.launch { drawerState.open() }
+                    if (selectedScreen == Screen.PayslipDetails) null else {
+                        { scope.launch { drawerState.open() } }
+                    }
                 },
                 onNotificationClick = {
                     selectedScreen = Screen.Notification
                 },
+                onBackClick = if (selectedScreen == Screen.PayslipDetails) {
+                    { selectedScreen = Screen.Payslip }
+                } else null,
             )
 
             Box(
@@ -82,13 +101,31 @@ fun DashboardScreen(modifier: Modifier) {
                     .weight(1f)
                     .background(MaterialTheme.colorScheme.background)
             ) {
-                when (selectedScreen) {
-                    Screen.Dashboard -> DashboardContent()
-                    Screen.Schedule -> ScheduleContent()
-                    Screen.Payslip -> PayslipContent()
-                    Screen.Profile -> ProfileContent()
-                    Screen.Notification -> NotificationContent()
-                    else -> {}
+                AnimatedContent(
+                    targetState = selectedScreen,
+                    transitionSpec = {
+                        fadeIn(animationSpec = tween(300)) togetherWith
+                                fadeOut(animationSpec = tween(300))
+                    },
+                    label = "ScreenTransition"
+                ) { screen ->
+                    when (screen) {
+                        Screen.Dashboard -> DashboardContent()
+                        Screen.Schedule -> ScheduleContent()
+                        Screen.Payslip -> PayslipContent(
+                            onPayslipSelected = {
+                                selectedPayslipData = it
+                                selectedScreen = Screen.PayslipDetails
+                            }
+                        )
+                        Screen.PayslipDetails -> {
+                            selectedPayslipData?.let { payslip ->
+                                PayslipDetailsScreen(payslip)
+                            }
+                        }
+                        Screen.Profile -> ProfileContent()
+                        Screen.Notification -> NotificationContent()
+                    }
                 }
             }
 

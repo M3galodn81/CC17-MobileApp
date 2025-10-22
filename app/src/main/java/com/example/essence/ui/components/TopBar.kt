@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material3.MaterialTheme
@@ -24,6 +26,7 @@ fun TopBar(
     name: String,
     modifier: Modifier = Modifier,
     onMenuClick: () -> Unit,
+    onBackClick: (() -> Unit)? = null,
     onNotificationClick: () -> Unit
 )
 {
@@ -36,12 +39,23 @@ fun TopBar(
         horizontalArrangement = Arrangement.SpaceAround
     ) {
 
-        IconOnlyFlatButton(
-            onMenuClick,
-            Modifier
-                .fillMaxHeight(),
-            Icons.Outlined.Menu
-        )
+        if (onBackClick != null) {
+            // Back button
+            IconOnlyFlatButton(
+                onBackClick,
+                modifier.fillMaxHeight(),
+                Icons.AutoMirrored.Filled.ArrowBack,
+            )
+        } else {
+            // Default menu button
+            IconOnlyFlatButton(
+                {onMenuClick?.invoke()},
+                modifier.fillMaxHeight(),
+                Icons.Outlined.Menu,
+            )
+        }
+
+
         Text(text = name,
             modifier = Modifier.padding(start = 16.dp),
             color = MaterialTheme.colorScheme.onPrimary,)
