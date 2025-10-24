@@ -16,18 +16,22 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.essence.data.model.PayslipData
+import java.text.NumberFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -61,7 +65,6 @@ fun PayslipSummaryCard(
             Row(){
                 Text(
                     text = "Start Date",
-                    fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Left,
                 )
@@ -77,7 +80,6 @@ fun PayslipSummaryCard(
             Row(){
                 Text(
                     text = "End Date",
-                    fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Left,
                 )
@@ -93,7 +95,6 @@ fun PayslipSummaryCard(
             Row(){
                 Text(
                     text = "Pay Date",
-                    fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Left,
                 )
@@ -106,10 +107,14 @@ fun PayslipSummaryCard(
                 )
             }
 
-
-
-
-
+            if (payslipData.remarks != null){
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Remarks",
+                    style = MaterialTheme.typography.titleLarge,
+                )
+                Text(text = payslipData.remarks)
+            }
         }
     }
 }

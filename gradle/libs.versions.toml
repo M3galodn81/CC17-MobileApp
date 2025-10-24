@@ -13,6 +13,7 @@ animationCoreLint = "1.9.3"
 protoliteWellKnownTypes = "18.0.1"
 foundation = "1.9.3"
 coreI18n = "1.0.0"
+ui = "1.9.4"
 
 
 [libraries]
@@ -35,6 +36,7 @@ androidx-animation-core-lint = { group = "androidx.compose.animation", name = "a
 protolite-well-known-types = { group = "com.google.firebase", name = "protolite-well-known-types", version.ref = "protoliteWellKnownTypes" }
 androidx-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
 androidx-core-i18n = { group = "androidx.core", name = "core-i18n", version.ref = "coreI18n" }
+ui = { group = "androidx.compose.ui", name = "ui", version.ref = "ui" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

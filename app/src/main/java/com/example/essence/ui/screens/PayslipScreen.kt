@@ -10,8 +10,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.example.essence.data.local.SessionManager
 import com.example.essence.data.model.PayslipData
+import com.example.essence.data.sample.SampleData
 import com.example.essence.ui.components.payslip.PayslipCard
 import com.example.essence.data.sample.payslips
 import com.example.essence.functions.formatPayPeriod
@@ -26,9 +29,11 @@ fun PayslipContent(onPayslipSelected: (PayslipData) -> Unit) {
         modifier = screenModifier(),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        PayslipLineChart(payslips)
+        val context = LocalContext.current
+        var UserPayslips = SampleData.userMapById[SessionManager.getUserId(context)]?.payslips as List<PayslipData>
+        PayslipLineChart(UserPayslips)
 
-        payslips.forEach { payslip ->
+        UserPayslips.forEach { payslip ->
             PayslipCard(
                 payPeriod = formatPayPeriod(payslip.payStartDate,payslip.payEndDate),
                 grossPay = "₱${"%,.2f".format(payslip.totalEarnings)}",

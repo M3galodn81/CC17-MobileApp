@@ -57,6 +57,7 @@ dependencies {
     implementation(libs.protolite.well.known.types)
     implementation(libs.androidx.foundation)
     implementation(libs.androidx.core.i18n)
+    implementation(libs.ui)
 
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.2")
     implementation("androidx.compose.animation:animation:1.9.3")

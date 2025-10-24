@@ -1,24 +1,25 @@
 package com.example.essence.ui.screens
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
+import com.example.essence.data.local.SessionManager
+import com.example.essence.data.model.User
+import com.example.essence.data.sample.SampleData
+import com.example.essence.ui.components.profile.ProfileCard
 
+
+
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ProfileContent() {
     Column(
         modifier = screenModifier()
     ) {
-        Text("Profile screen")
-        repeat(35) {
-            Text("Item Number #$it", color = MaterialTheme.colorScheme.onBackground)
-        }
+        val context = LocalContext.current.applicationContext
+        val user: User = SampleData.userMapById[SessionManager.getUserId(context)] as User
+        ProfileCard(user)
     }
 }

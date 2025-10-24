@@ -12,17 +12,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.essence.CRASH_COUNTER
 import com.example.essence.MainActivity
 import com.example.essence.R
+import com.example.essence.data.local.SessionManager
+import com.example.essence.sendTestNotification
+import com.example.essence.ui.screens.Routes
 import com.example.essence.ui.screens.Screen
 
 @Composable
 fun NavigationDrawerContent(
+    navController : NavController,
     onClose: () -> Unit,
     onItemSelected: (Screen) -> Unit
 ) {
     val context = LocalContext.current
+
 
     Column(
         modifier = Modifier.padding(horizontal = 16.dp)
@@ -79,8 +86,24 @@ fun NavigationDrawerContent(
             icon = { Icon(Icons.Outlined.Settings, contentDescription = null) },
             onClick = { onClose()
                 if (context is MainActivity) {
-                    context.sendTestNotification()
+                    sendTestNotification(context)
                 } },
+        )
+
+        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+        Text("Account", modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.titleMedium)
+        NavigationDrawerItem(
+            label = { Text("Sign Out") },
+            selected = false,
+            icon = { Icon(Icons.Outlined.Settings, contentDescription = null) },
+            onClick = { onClose()
+                SessionManager.clearSession(context)
+                navController.navigate(Routes.LOGIN) {
+                    popUpTo(0)
+                    launchSingleTop = true
+                }
+            },
         )
         Spacer(Modifier.height(12.dp))
     }

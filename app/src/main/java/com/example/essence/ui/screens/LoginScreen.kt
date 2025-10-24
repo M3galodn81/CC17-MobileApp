@@ -1,5 +1,7 @@
 package com.example.essence.ui.screens
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
@@ -19,9 +21,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import com.example.essence.data.local.SessionManager
+import com.example.essence.data.sample.SampleData
 
 
 // --- Navigation Routes must be defined in one place, so we place them here ---
@@ -31,6 +38,7 @@ object Routes {
     const val DASHBOARD = "dashboard_route"
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun LoginScreen(navController: NavController) {
     Column(
@@ -57,7 +65,15 @@ fun LoginScreen(navController: NavController) {
             onValueChange = { emailUserInput = it },
             label = { Text("Email") },
             leadingIcon = { Icon(Icons.Default.Person, contentDescription = "Email") },
-            modifier = Modifier.fillMaxWidth().padding( 16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.None,
+                autoCorrectEnabled = false,
+                keyboardType = KeyboardType.Email,
+                imeAction = ImeAction.Unspecified
+            ),
         )
 
         OutlinedTextField(
@@ -65,10 +81,13 @@ fun LoginScreen(navController: NavController) {
             onValueChange = { passwordUserInput = it},
             label = { Text("Password") },
             leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Password") },
-            modifier = Modifier.fillMaxWidth().padding(16.dp,0.dp,16.dp,32.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp, 0.dp, 16.dp, 32.dp),
 
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            singleLine = true,
 
             trailingIcon = {
                 val image = if (passwordVisible)
@@ -81,14 +100,22 @@ fun LoginScreen(navController: NavController) {
             },
 
         )
+        val context = LocalContext.current.applicationContext
 
         Button(
             onClick = {
-                // In a real app, this is where you'd verify credentials
-                // If successful:
-                navController.navigate(Routes.DASHBOARD) {
-                    popUpTo(0)
-                    launchSingleTop = true
+                val user = SampleData.userMapByEmail[emailUserInput]
+
+                if (user != null && user.password == passwordUserInput) {
+
+                    SessionManager.saveSession(context, user)
+                    navController.navigate(Routes.DASHBOARD) {
+                        popUpTo(0)
+                        launchSingleTop = true
+                    }
+                }
+                else {
+
                 }
             },
             modifier = Modifier

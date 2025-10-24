@@ -1,5 +1,6 @@
 package com.example.essence.ui.screens
 
+import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContent
@@ -33,6 +34,9 @@ import kotlinx.coroutines.launch
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavController
+import com.example.essence.data.local.SessionManager
 import com.example.essence.ui.components.dashboar.GlobalLoadingOverlay
 
 enum class Screen { Dashboard,
@@ -40,6 +44,8 @@ enum class Screen { Dashboard,
                     Payslip, PayslipDetails,
                     Profile,
                     Notification,  }
+
+
 
 @Composable
 fun screenModifier(): Modifier {
@@ -52,7 +58,7 @@ fun screenModifier(): Modifier {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun DashboardScreen(modifier: Modifier) {
+fun DashboardScreen(modifier: Modifier,navController : NavController) {
     // Check current screen
     var selectedScreen by remember { mutableStateOf(Screen.Dashboard) }
     var selectedPayslipData by remember { mutableStateOf<PayslipData?>(null) }
@@ -85,7 +91,8 @@ fun DashboardScreen(modifier: Modifier) {
                     onClose = { scope.launch { drawerState.close() } },
                     onItemSelected = { screen ->
                         switchScreen(screen)
-                    }
+                    },
+                    navController = navController
                 )
             }
         }
