@@ -57,21 +57,17 @@ fun PayslipLineChart(payslips: List<PayslipData>) {
     val monthFormatter = DateTimeFormatter.ofPattern("MMM")
     val xLabels = data.map { it.payStartDate.format(monthFormatter) }
 
-    // --- NEW: Guideline 1, 2, 4 ---
-    // Dynamically calculate a "nice" axis scale and step
     val axisDetails = remember(minPay, maxPay) {
         calculateNiceAxis(minPay, maxPay)
     }
     val minAxis = axisDetails.minAxis
     val maxAxis = axisDetails.maxAxis
     val niceStep = axisDetails.step
-    // --- End NEW ---
+
 
     val axisColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
     val axisStrokeWidth = with(LocalDensity.current) { 1.dp.toPx() }
 
-    // --- NEW: Guideline 5 ---
-    // A separate, fainter color for the gridlines
     val gridColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
 
 
@@ -101,7 +97,7 @@ fun PayslipLineChart(payslips: List<PayslipData>) {
             val height = size.height
             val width = size.width
 
-            // --- MODIFIED: Use the new rounded axis range ---
+
             val axisValueRange = (maxAxis - minAxis).takeIf { it > 0f } ?: 1f
 
             val points = netPayValues.mapIndexed { index, value ->
@@ -110,19 +106,18 @@ fun PayslipLineChart(payslips: List<PayslipData>) {
                 } else {
                     width / 2f
                 }
-                // --- MODIFIED: Calculate Y based on new minAxis and axisValueRange ---
                 val y = height - ((value - minAxis) / axisValueRange * height)
                 Offset(x, y)
             }
 
-            // --- Main Y-axis line (same) ---
+
             drawLine(
                 color = axisColor,
                 start = Offset(0f, 0f),
                 end = Offset(0f, height),
                 strokeWidth = axisStrokeWidth
             )
-            // --- Main X-axis line (same) ---
+
             drawLine(
                 color = axisColor,
                 start = Offset(0f, height),
@@ -130,17 +125,12 @@ fun PayslipLineChart(payslips: List<PayslipData>) {
                 strokeWidth = axisStrokeWidth
             )
 
-
-            // --- NEW: Y-Axis Labels & Gridlines (Guidelines 2, 3, 5) ---
-            // Replaces the old static min/mid/max logic
             val tickValues = (minAxis.toInt()..maxAxis.toInt() step niceStep.toInt())
 
             tickValues.forEach { tickValue ->
-                // Calculate Y position for this tick
+
                 val tickY = height - ((tickValue - minAxis) / axisValueRange * height)
 
-                // Draw Gridline (Guideline 5)
-                // (Don't draw for minAxis, as it's the X-axis itself)
                 if (tickValue != minAxis.toInt()) {
                     drawLine(
                         color = gridColor,
@@ -150,7 +140,7 @@ fun PayslipLineChart(payslips: List<PayslipData>) {
                     )
                 }
 
-                // Format and Measure Label (Guideline 3)
+                // Format and Measure Label
                 val label = "₱${(tickValue / 1000f).roundToInt()}K"
                 val labelResult = textMeasurer.measure(AnnotatedString(label), labelStyle)
 
@@ -163,10 +153,7 @@ fun PayslipLineChart(payslips: List<PayslipData>) {
                     )
                 )
             }
-            // --- End NEW ---
 
-
-            // --- X-axis labels (same as before) ---
             points.forEachIndexed { index, point ->
                 val label = xLabels[index]
                 val labelResult = textMeasurer.measure(AnnotatedString(label), labelStyle)
@@ -179,7 +166,6 @@ fun PayslipLineChart(payslips: List<PayslipData>) {
                 )
             }
 
-            // --- Line path (same as before) ---
             if (points.size > 1) {
                 val path = Path().apply {
                     moveTo(points.first().x, points.first().y)
@@ -194,7 +180,6 @@ fun PayslipLineChart(payslips: List<PayslipData>) {
                 )
             }
 
-            // --- Data points (same as before) ---
             points.forEach {
                 drawCircle(
                     color = lineColor,
@@ -221,7 +206,6 @@ private data class AxisDetails(
 )
 
 /**
- * Implements Guidelines 1, 2, and 4.
  * Calculates a "nice" min, max, and step for the Y-axis
  * to ensure rounded, evenly-spaced labels.
  */

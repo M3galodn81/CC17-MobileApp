@@ -18,6 +18,7 @@ import com.example.essence.data.sample.SampleData
 import com.example.essence.ui.components.payslip.PayslipCard
 import com.example.essence.data.sample.payslips
 import com.example.essence.functions.formatPayPeriod
+import com.example.essence.ui.components.payslip.Payslip13thMonthCard
 import com.example.essence.ui.components.payslip.PayslipLineChart
 
 
@@ -32,7 +33,7 @@ fun PayslipContent(onPayslipSelected: (PayslipData) -> Unit) {
         val context = LocalContext.current
         var UserPayslips = SampleData.userMapById[SessionManager.getUserId(context)]?.payslips as List<PayslipData>
         PayslipLineChart(UserPayslips)
-
+        Payslip13thMonthCard(UserPayslips)
         UserPayslips.forEach { payslip ->
             PayslipCard(
                 payPeriod = formatPayPeriod(payslip.payStartDate,payslip.payEndDate),
@@ -43,6 +44,8 @@ fun PayslipContent(onPayslipSelected: (PayslipData) -> Unit) {
                 }
             )
         }
+
+
 
     }
 }

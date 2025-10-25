@@ -92,7 +92,7 @@ fun PayslipCard(
             ) {
                 Text(
                     text = "View Details",
-                    color = MaterialTheme.colorScheme.primary,
+//                    color = MaterialTheme.colorScheme.primary,
                     fontSize = 12.sp,
                 )
             }

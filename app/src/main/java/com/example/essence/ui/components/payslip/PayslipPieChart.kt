@@ -7,6 +7,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -14,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -160,20 +162,18 @@ fun DeductionsChart(
 
     // Extract deductions and group them
     val deductions = listOf(
-        "Tax" to payslip.tax,
-        "SSS" to payslip.sss,
-        "PhilHealth" to payslip.philHealth,
-        "Pag-IBIG" to payslip.pagIbig,
+        "SSS" to payslip.sss.employeeShare,
+        "PhilHealth" to payslip.philHealth.employeeShare,
+        "Pag-IBIG" to payslip.pagIbig.employeeShare,
         "Others" to payslip.otherDeductions
     )
-
     val total = deductions.sumOf { it.second }
 
     // Color palette (consistent with Material theme)
     val colors = listOf(
-        Color(0xFFE57373), // Tax - red
         Color(0xFF64B5F6), // SSS - blue
         Color(0xFF81C784), // PhilHealth - green
+        Color(0xFFE57373), // Tax - red
         Color(0xFFFFB74D), // Pag-IBIG - orange
         Color(0xFFBA68C8)  // Other - purple
     )
@@ -256,24 +256,113 @@ fun DeductionsChart(
 
         Spacer(Modifier.height(16.dp))
 
-        // Legend
-        deductions.forEachIndexed { index, (label, value) ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 2.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Row {
-                    Box(
-                        modifier = Modifier
-                            .size(12.dp)
-                            .padding(end = 8.dp)
-                            .then(Modifier.background(colors[index]))
-                    )
-                    Text(label)
+        // =================================================
+        // START: Updated & Simplified Legend
+        // =================================================
+        Column(modifier = Modifier.fillMaxWidth()) {
+
+            // --- SSS ---
+            val sss = payslip.sss
+            val sssDetails = if (sss.msc > 0) {
+                "5.0% of MSC (₱${"%,.0f".format(sss.msc)})"
+            } else null
+
+            DeductionLegendItem(
+                label = "SSS",
+                color = colors[0],
+                employeeShare = sss.employeeShare,
+                details = sssDetails
+            )
+
+            // --- PhilHealth ---
+            val philhealth = payslip.philHealth
+            val phDetails = when (philhealth.employeeShare) {
+                // Min cap
+                250.0 -> "Fixed Premium (Basis <= ₱10,000)"
+                // Max cap
+                2500.0 -> "Fixed Premium (Basis >= ₱100,000)"
+                // Variable rate
+                else -> {
+                    val grossSalaryBasis = philhealth.employeeShare / 0.025
+                    "2.5% of (₱${"%,.2f".format(grossSalaryBasis)})"
                 }
-                Text("₱${"%,.2f".format(value)}")
+            }
+
+            DeductionLegendItem(
+                label = "PhilHealth",
+                color = colors[1],
+                employeeShare = philhealth.employeeShare,
+                details = phDetails
+            )
+
+            // --- Pag-IBIG ---
+            val pagibig = payslip.pagIbig
+            val pagibigDetails = if (pagibig.employeeRate > 0) {
+                "${"%.0f".format(pagibig.employeeRate * 100)}% Contribution"
+            } else null
+
+            DeductionLegendItem(
+                label = "Pag-IBIG",
+                color = colors[2],
+                employeeShare = pagibig.employeeShare,
+                details = pagibigDetails
+            )
+
+            // --- Others ---
+            DeductionLegendItem(
+                label = "Others",
+                color = colors[3],
+                employeeShare = payslip.otherDeductions,
+                details = null // No details for "Others"
+            )
+        }
+
+    }
+}
+
+
+@Composable
+private fun DeductionLegendItem(
+    label: String,
+    color: Color,
+    employeeShare: Double,
+    details: String? = null
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        verticalAlignment = CenterVertically
+    ) {
+        // Color box and Main Label
+        Row(
+            modifier = Modifier.weight(1f),
+            verticalAlignment = CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(12.dp)
+                    .background(color)
+            )
+            Spacer(Modifier.width(8.dp))
+            Text(label, style = MaterialTheme.typography.bodyMedium)
+        }
+
+        // Breakdown Text
+        Column(horizontalAlignment = Alignment.End) {
+            // Employee Share (the amount deducted)
+            Text(
+                "₱${"%,.2f".format(employeeShare)}",
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Bold
+            )
+            // Show the new details string if it exists
+            if (details != null) {
+                Text(
+                    text = details,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }

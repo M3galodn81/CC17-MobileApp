@@ -1,5 +1,8 @@
 package com.example.essence.data.model
 
+import com.example.essence.data.local.CalculatorPAGIBIG
+import com.example.essence.data.local.CalculatorPhilHealth
+import com.example.essence.data.local.CalculatorSSS
 import java.time.LocalDate
 
 data class PayslipData(
@@ -12,11 +15,10 @@ data class PayslipData(
     val holidayPay: Double,
     val allowances: Double,
     val bonuses: Double,
-    val tax: Double,
-    val sss: Double,
-    val philHealth: Double,
-    val pagIbig: Double,
+
+
     val otherDeductions: Double,
+
     val remarks: String? = null,
     val employeeId: String? = null,
     val employeeName: String? = null,
@@ -27,8 +29,18 @@ data class PayslipData(
         get() = basicPay + overtimePay + holidayPay + allowances + bonuses
 
     val totalDeductions: Double
-        get() = tax + sss + philHealth + pagIbig + otherDeductions
+        get() = sss.employeeShare +
+                philHealth.employeeShare +
+                pagIbig.employeeShare + otherDeductions
 
     val netPay: Double
         get() = totalEarnings - totalDeductions
+
+    val sss: BreakdownSSS
+        get() = CalculatorSSS.computeContribution(totalEarnings)
+
+    val philHealth: BreakdownPhilHealth
+        get() = CalculatorPhilHealth.computeContribution(totalEarnings)
+    val pagIbig: BreakdownPAGIBIG
+        get() = CalculatorPAGIBIG.computeContribution(totalEarnings)
 }
