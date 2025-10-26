@@ -17,6 +17,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.essence.data.model.PayslipData
@@ -315,8 +316,9 @@ fun DeductionsChart(
                 employeeShare = payslip.otherDeductions,
                 details = null // No details for "Others"
             )
-        }
 
+
+        }
     }
 }
 

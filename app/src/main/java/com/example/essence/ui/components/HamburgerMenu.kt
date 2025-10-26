@@ -56,6 +56,13 @@ fun NavigationDrawerContent(
             icon = {Icon(painterResource(R.drawable.icon_leave), contentDescription = null) },
         )
         NavigationDrawerItem(
+            label = { Text("Leave") },
+            selected = false,
+            onClick = { onClose()
+                onItemSelected(Screen.Leave) },
+            icon = {Icon(painterResource(R.drawable.icon_leave), contentDescription = null) },
+        )
+        NavigationDrawerItem(
             label = { Text("Payslip") },
             selected = false,
             onClick = { onClose()

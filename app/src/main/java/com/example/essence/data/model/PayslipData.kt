@@ -33,6 +33,11 @@ data class PayslipData(
                 philHealth.employeeShare +
                 pagIbig.employeeShare + otherDeductions
 
+    val mandatoryDeductions: Double
+        get() = sss.employeeShare +
+                philHealth.employeeShare +
+                pagIbig.employeeShare
+
     val netPay: Double
         get() = totalEarnings - totalDeductions
 

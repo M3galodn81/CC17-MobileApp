@@ -1,0 +1,162 @@
+@startuml
+
+' This makes the diagram look cleaner
+skinparam classAttributeIconSize 0
+
+' --- Government Contribution Breakdowns ---
+class BreakdownPAGIBIG {
+  +employeeRate: Double
+  +employeeShare: Double
+  +employerShare: Double
+  +totalContribution: Double
+}
+
+class BreakdownPhilHealth {
+  +contribution: Double
+  +employeeShare: Double
+  +employerShare: Double
+  +totalContribution: Double
+}
+
+class BreakdownSSS {
+  +msc: Double
+  +employeeShare: Double
+  +employerShare: Double
+  +totalContribution: Double
+}
+
+' --- Payroll ---
+class PayslipData {
+  +id: String
+  +payStartDate: LocalDate
+  +payEndDate: LocalDate
+  +payDate: LocalDate
+  +basicPay: Double
+  +overtimePay: Double
+  +holidayPay: Double
+  +allowances: Double
+  +bonuses: Double
+  +otherDeductions: Double
+  +remarks: String
+  +employeeId: String
+  +employeeName: String
+  +department: String
+  +position: String
+
+  .. Computed Properties ..
+  +getTotalEarnings(): Double
+  +getTotalDeductions(): Double
+  +getNetPay(): Double
+  +getSss(): BreakdownSSS
+  +getPhilHealth(): BreakdownPhilHealth
+  +getPagIbig(): BreakdownPAGIBIG
+}
+
+' --- Scheduling ---
+class Shift {
+    +id: String
+    +employeeId: String
+    +start: LocalDateTime
+    +end: LocalDateTime
+    +role: String
+}
+
+' (Renamed from EmployeeSchedul)
+class EmployeeSchedule {
+    +employeeId: String
+    +employeeName: String
+    +shifts: List<Shift>
+}
+
+' --- User & Roles ---
+class User {
+  .. Core Identity & App Access ..
+  +id: String
+  +email: String
+  -password: String {internal}
+  +role: UserRole
+
+  .. Employment Details ..
+  +position: String
+  +department: String
+  +hireDate: LocalDate
+  +managerId: String
+
+  .. Personal Information ..
+  +firstName: String
+  +lastName: String
+  +middleName: String
+  +phone: String
+  +address: String
+  +birthDate: LocalDate
+
+  .. Government & Payroll IDs ..
+  +tin: String
+  +sssNumber: String
+  +philHealthNumber: String
+  +pagIbigNumber: String
+
+  .. Computed Properties ..
+  +getFullName(): String
+}
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  EMPLOYEE
+}
+
+' SessionManager is a singleton (Kotlin object)
+object SessionManager {
+  .. Private ..
+  -PREFS_NAME: String
+  -KEY_USER_ID: String
+  -KEY_USER_EMAIL: String
+  -KEY_USER_ROLE: String
+  -KEY_USER_FULL_NAME: String
+  -getPreferences(context: Context): SharedPreferences
+  .. Public API ..
+  +saveSession(context: Context, user: User)
+  +clearSession(context: Context)
+  +isLoggedIn(context: Context): Boolean
+  +getUserId(context: Context): String
+  +getFullName(context: Context): String
+  +getUserRole(context: Context): UserRole
+}
+
+' Classes that SessionManager depends on
+class User
+enum UserRole
+class Context <<Android>>
+class SharedPreferences <<Android>>
+
+' --- Relationships ---
+
+' SessionManager depends on (uses) User and UserRole
+SessionManager ..> User : uses
+SessionManager ..> UserRole : uses
+
+' SessionManager depends heavily on the Android Context
+SessionManager ..> Context : uses
+
+' SessionManager's core function is to use SharedPreferences
+SessionManager ..> SharedPreferences : uses
+
+' === EXISTING RELATIONSHIPS ===
+User *-- "1" UserRole
+User "1" -- "0..*" User : manages
+User "1" -- "0..*" PayslipData : has
+
+' === NEWLY ADDED RELATIONSHIPS ===
+
+' A User has one schedule, which is composed of many shifts
+User "1" -- "1" EmployeeSchedule : has schedule
+EmployeeSchedule "1" *-- "0..*" Shift : contains
+
+' PayslipData uses the Breakdown classes for its calculations
+' (Dotted line represents dependency/usage)
+PayslipData ..> BreakdownSSS : uses
+PayslipData ..> BreakdownPhilHealth : uses
+PayslipData ..> BreakdownPAGIBIG : uses
+
+@enduml

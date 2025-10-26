@@ -41,6 +41,7 @@ import com.example.essence.ui.components.dashboar.GlobalLoadingOverlay
 
 enum class Screen { Dashboard,
                     Schedule,
+                    Leave,
                     Payslip, PayslipDetails,
                     Profile,
                     Notification,  }
@@ -145,6 +146,8 @@ fun DashboardScreen(modifier: Modifier,navController : NavController) {
                         }
                         Screen.Profile -> ProfileContent()
                         Screen.Notification -> NotificationContent()
+
+                        else -> DashboardContent()
                     }
                 }
                 if (isLoading) {

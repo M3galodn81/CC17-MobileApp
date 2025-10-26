@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import com.example.essence.data.model.PayslipData
 import com.example.essence.ui.components.payslip.DeductionsChart
 import com.example.essence.ui.components.payslip.GrossPayChart
+import com.example.essence.ui.components.payslip.PayslipFinancialSummaryCard
 import com.example.essence.ui.components.payslip.PayslipSummaryCard
 
 
@@ -27,6 +28,7 @@ fun PayslipDetailsScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         PayslipSummaryCard(payslipData)
+        PayslipFinancialSummaryCard(payslipData)
         GrossPayChart(payslipData)
         DeductionsChart(payslipData)
 
