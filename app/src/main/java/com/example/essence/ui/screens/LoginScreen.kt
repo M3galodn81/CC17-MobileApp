@@ -28,6 +28,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import com.example.essence.data.local.SessionManager
+import com.example.essence.data.model.UserRole
 import com.example.essence.data.sample.SampleData
 
 
@@ -40,7 +41,8 @@ object Routes {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun LoginScreen(navController: NavController) {
+fun LoginScreen(navController: NavController,
+                onLoginSuccess: (UserRole) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -109,6 +111,7 @@ fun LoginScreen(navController: NavController) {
                 if (user != null && user.password == passwordUserInput) {
 
                     SessionManager.saveSession(context, user)
+                    onLoginSuccess(user.role)
                     navController.navigate(Routes.DASHBOARD) {
                         popUpTo(0)
                         launchSingleTop = true
@@ -129,8 +132,8 @@ fun LoginScreen(navController: NavController) {
         }
 
         // Go to REGISTER
-        TextButton(onClick = { navController.navigate(Routes.REGISTRATION) }) {
-            Text("First time here? Sign up.", color = MaterialTheme.colorScheme.primary)
-        }
+//        TextButton(onClick = { navController.navigate(Routes.REGISTRATION) }) {
+//            Text("First time here? Sign up.", color = MaterialTheme.colorScheme.primary)
+//        }
     }
 }

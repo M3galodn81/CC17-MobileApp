@@ -33,10 +33,22 @@ import com.example.essence.ui.components.dashboard.TopBar
 import kotlinx.coroutines.launch
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavController
+import com.example.essence.LocalUserRole
 import com.example.essence.data.local.SessionManager
+import com.example.essence.data.model.UserRole
+import com.example.essence.sendTestNotification
+import com.example.essence.ui.components.RoleBasedContent
 import com.example.essence.ui.components.dashboar.GlobalLoadingOverlay
 
 enum class Screen { Dashboard,
@@ -169,17 +181,110 @@ fun DashboardScreen(modifier: Modifier,navController : NavController) {
 @Composable
 fun DashboardContent() {
     Column(
-        modifier = screenModifier()
+        modifier = screenModifier(),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        repeat(50) {
-            Text("Dashboard item #$it", color = MaterialTheme.colorScheme.onBackground)
+        // --- 1. Header ---
+
+        Text(
+            text = "Dashboard",
+            style = MaterialTheme.typography.headlineLarge
+        )
+
+        val userRole = LocalUserRole.current
+        Text(
+            text = "Your access level: $userRole",
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.primary
+        )
+
+
+        // --- 2. Role-Based Widgets ---
+
+        RoleBasedContent(
+            adminContent = { AdminDashboard() },
+            managerContent = { ManagerDashboard() },
+            employeeContent = { EmployeeDashboard() }
+        )
+
+    }
+}
+
+// --- Specific Dashboard UIs ---
+
+@Composable
+fun EmployeeDashboard() {
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        Text(
+            text = "Your Tools",
+            style = MaterialTheme.typography.titleMedium
+        )
+        DashboardCard(title = "My Schedule", content = "View your upcoming shifts.")
+        DashboardCard(title = "My Payslips", content = "Access your pay history.")
+        DashboardCard(title = "File a Leave", content = "Submit a request for time off.")
+    }
+}
+
+@Composable
+fun ManagerDashboard() {
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        // Managers see their own tools first
+        EmployeeDashboard()
+
+        // Then they see manager-specific tools
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = "Manager Tools",
+            style = MaterialTheme.typography.titleMedium
+        )
+        DashboardCard(title = "Team Schedule", content = "View your team's calendar.")
+        DashboardCard(title = "Approve Requests", content = "Manage leave and overtime.")
+    }
+}
+
+@Composable
+fun AdminDashboard() {
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        // Admins see all tools
+        ManagerDashboard()
+
+        // Then they see admin-specific tools
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = "Admin Tools",
+            style = MaterialTheme.typography.titleMedium
+        )
+        DashboardCard(title = "Manage Users", content = "Add or remove employees.")
+        DashboardCard(title = "System Settings", content = "Configure app-wide settings.")
+
+        val context  =  LocalContext.current
+        // Add the test button here
+        Button(onClick = { sendTestNotification(context) }) {
+            Text("Send Test Notification")
         }
     }
 }
 
-
-
-
-
-
-
+/**
+ * A simple, reusable Card for dashboard items.
+ */
+@Composable
+fun DashboardCard(title: String, content: String) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = content,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    }
+}

@@ -20,8 +20,6 @@ import com.example.essence.ui.screens.DashboardScreen
 import com.example.essence.ui.screens.LoginScreen
 import com.example.essence.ui.screens.RegistrationScreen
 import com.example.essence.ui.screens.Routes
-import java.time.LocalDate
-
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
@@ -29,15 +27,20 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.getSystemService
-import com.example.essence.R
+import com.example.essence.data.local.SessionManager
+import com.example.essence.data.model.UserRole
 
 // VALUES
 var notificationCount = 789
 const val CRASH_COUNTER = 1
+
+val LocalUserRole = compositionLocalOf<UserRole> {
+    error("No UserRole provided")
+}
 class MainActivity : ComponentActivity() {
 
     // --- Permission Launcher ---
@@ -72,8 +75,19 @@ class MainActivity : ComponentActivity() {
         createNotificationChannel()
         askNotificationPermission() // Ask for permission on startup
         setContent {
-            ESSenceTheme {
-                AppNavigation()
+            val context = LocalContext.current
+            var userRole by remember {
+                mutableStateOf(SessionManager.getUserRole(context))
+            }
+
+            CompositionLocalProvider(LocalUserRole provides userRole) {
+                ESSenceTheme {
+                    AppNavigation(
+                        onLoginSuccess = { newRole ->
+                            userRole = newRole
+                        },
+                    )
+                }
             }
         }
     }
@@ -121,31 +135,37 @@ fun sendTestNotification(context: Context) {
     }
 }
 
-
-
-
 // --- Navigation Composable (The core of the multi-screen app) ---
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun AppNavigation() {
+fun AppNavigation(
+    onLoginSuccess: (UserRole) -> Unit
+) {
     val navController = rememberNavController()
 
+    val context = LocalContext.current
+    val startDestination = if (SessionManager.isLoggedIn(context)) {
+        Routes.DASHBOARD
+    } else {
+        Routes.LOGIN
+    }
 
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Routes.LOGIN, // Start the app at the Login screen
+            startDestination = startDestination,
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Routes.LOGIN) {
                 // Using LoginScreen
-                LoginScreen(navController = navController)
+                LoginScreen(navController = navController,
+                    onLoginSuccess = onLoginSuccess)
             }
 
-            composable(Routes.REGISTRATION) {
-                // Using LoginScreen
-                RegistrationScreen(navController = navController)
-            }
+//            composable(Routes.REGISTRATION) {
+//                // Using LoginScreen
+//                RegistrationScreen(navController = navController)
+//            }
             composable(Routes.DASHBOARD) {
                 // Using DashboardScreen
                 DashboardScreen(
