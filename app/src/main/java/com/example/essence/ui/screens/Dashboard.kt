@@ -145,6 +145,7 @@ fun DashboardScreen(modifier: Modifier,navController : NavController) {
                     when (screen) {
                         Screen.Dashboard -> DashboardContent()
                         Screen.Schedule -> ScheduleContent()
+                        Screen.Leave -> LeaveContent()
                         Screen.Payslip -> PayslipContent(
                             onPayslipSelected = {
                                 selectedPayslipData = it
