@@ -96,7 +96,13 @@ fun LeaveContent() {
             Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
                 EmployeeApplyScreen(onSubmit = onSubmitRequest)
             }
-        }
+        },
+        payrollContent =
+            {
+                Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+                    EmployeeApplyScreen(onSubmit = onSubmitRequest)
+                }
+            }
     )
 }
 

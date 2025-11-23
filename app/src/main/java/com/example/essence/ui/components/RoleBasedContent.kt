@@ -14,7 +14,8 @@ import com.example.essence.data.local.SessionManager
 fun RoleBasedContent(
     adminContent: @Composable () -> Unit,
     managerContent: @Composable () -> Unit,
-    employeeContent: @Composable () -> Unit
+    employeeContent: @Composable () -> Unit,
+    payrollContent: @Composable () -> Unit
 ) {
     // Just read the role directly! No context needed.
     val role = LocalUserRole.current
@@ -23,5 +24,6 @@ fun RoleBasedContent(
         UserRole.ADMIN -> adminContent()
         UserRole.MANAGER -> managerContent()
         UserRole.EMPLOYEE -> employeeContent()
+        UserRole.PAYROLL_OFFICER -> payrollContent()
     }
 }

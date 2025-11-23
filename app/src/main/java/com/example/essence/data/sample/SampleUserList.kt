@@ -31,6 +31,27 @@ object SampleData {
         pagIbigNumber = "1234-5678-9012"
     )
 
+    val payrollUser = User(
+        id = "110",
+        email = "user@example.com",
+        password = "Password1", // For testing
+        role = UserRole.PAYROLL_OFFICER,
+        position = "Payroll Officer",
+        department = "Management",
+        hireDate = LocalDate.of(2018, 5, 10),
+        managerId = null, // Top-level, no manager
+        firstName = "Alex",
+        lastName = "Reyes",
+        middleName = "Cruz",
+        phone = "09171234567",
+        address = "123 Ayala Ave, Makati City",
+        birthDate = LocalDate.of(1985, 3, 15),
+        tin = "123-456-789-000",
+        sssNumber = "34-1234567-8",
+        philHealthNumber = "01-0123456789-0",
+        pagIbigNumber = "1234-5678-9012"
+    )
+
     // --- USER 2: AN EMPLOYEE ---
     val employeeUser = User(
         id = "201",
@@ -76,7 +97,7 @@ object SampleData {
     )
 
     // --- A list of all users for convenience ---
-    val allUsers = listOf(managerUser, employeeUser, adminUser)
+    val allUsers = listOf(managerUser, employeeUser, adminUser, payrollUser)
 
     /**
      * A map to quickly find a user by their email,
