@@ -1,64 +1,43 @@
 package com.example.essence.ui.screens
 
-import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.rememberDrawerState
-import androidx.compose.runtime.rememberCoroutineScope
-import com.example.essence.ui.components.NavigationDrawerContent
+import androidx.navigation.NavController
+import com.example.essence.LocalUserRole
 import com.example.essence.data.model.PayslipData
 import com.example.essence.functions.formatTitleCaseWithSpaces
+import com.example.essence.sendTestNotification
+import com.example.essence.ui.components.NavigationDrawerContent
+import com.example.essence.ui.components.RoleBasedContent
+import com.example.essence.ui.components.dashboar.GlobalLoadingOverlay
 import com.example.essence.ui.components.dashboard.BottomBar
 import com.example.essence.ui.components.dashboard.TopBar
 import kotlinx.coroutines.launch
-import androidx.compose.animation.*
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
-import androidx.navigation.NavController
-import com.example.essence.LocalUserRole
-import com.example.essence.data.local.SessionManager
-import com.example.essence.data.model.UserRole
-import com.example.essence.sendTestNotification
-import com.example.essence.ui.components.RoleBasedContent
-import com.example.essence.ui.components.dashboar.GlobalLoadingOverlay
 
-enum class Screen { Dashboard,
-                    Schedule,
-                    Leave,
-                    Payslip, PayslipDetails,
-                    Profile,
-                    Notification,  }
-
-
+enum class Screen {
+    Dashboard,
+    Schedule,
+    Leave,
+    Payslip, PayslipDetails,
+    Profile,
+    Notification,
+    PayrollProcessing // Added for Payroll Officer flow
+}
 
 @Composable
 fun screenModifier(): Modifier {
@@ -68,10 +47,9 @@ fun screenModifier(): Modifier {
         .verticalScroll(rememberScrollState())
 }
 
-
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun DashboardScreen(modifier: Modifier,navController : NavController) {
+fun DashboardScreen(modifier: Modifier, navController: NavController) {
     // Check current screen
     var selectedScreen by remember { mutableStateOf(Screen.Dashboard) }
     var selectedPayslipData by remember { mutableStateOf<PayslipData?>(null) }
@@ -119,8 +97,7 @@ fun DashboardScreen(modifier: Modifier,navController : NavController) {
                         null
                     else {
                         { scope.launch { drawerState.open() } }
-                    }
-                ,
+                    },
                 onNotificationClick = {
                     switchScreen(Screen.Notification)
                 },
@@ -143,7 +120,9 @@ fun DashboardScreen(modifier: Modifier,navController : NavController) {
                     label = "ScreenTransition"
                 ) { screen ->
                     when (screen) {
-                        Screen.Dashboard -> DashboardContent()
+                        Screen.Dashboard -> DashboardContent(
+                            onNavigate = { target -> switchScreen(target) }
+                        )
                         Screen.Schedule -> ScheduleContent()
                         Screen.Leave -> LeaveContent()
                         Screen.Payslip -> PayslipContent(
@@ -160,7 +139,14 @@ fun DashboardScreen(modifier: Modifier,navController : NavController) {
                         Screen.Profile -> ProfileContent()
                         Screen.Notification -> NotificationContent()
 
-                        else -> DashboardContent()
+                        // Placeholder for the new Payroll Processing screen
+                        Screen.PayrollProcessing -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text("Payroll Processing Screen")
+                        }
+
+                        else -> DashboardContent(
+                            onNavigate = { target -> switchScreen(target) }
+                        )
                     }
                 }
                 if (isLoading) {
@@ -180,7 +166,7 @@ fun DashboardScreen(modifier: Modifier,navController : NavController) {
 }
 
 @Composable
-fun DashboardContent() {
+fun DashboardContent(onNavigate: (Screen) -> Unit) {
     Column(
         modifier = screenModifier(),
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -199,38 +185,107 @@ fun DashboardContent() {
             color = MaterialTheme.colorScheme.primary
         )
 
-
         // --- 2. Role-Based Widgets ---
+        // We check if the string representation of the role matches "PayrollOfficer"
+        // If RoleBasedContent doesn't support a specific 'payroll' slot, we handle it here.
 
-        RoleBasedContent(
-            adminContent = { AdminDashboard() },
-            managerContent = { ManagerDashboard() },
-            employeeContent = { EmployeeDashboard() }
-        )
-
+        if (userRole.toString() == "PayrollOfficer") {
+            PayrollOfficerDashboard(onNavigate)
+        } else {
+            RoleBasedContent(
+                adminContent = { AdminDashboard(onNavigate) },
+                managerContent = { ManagerDashboard(onNavigate) },
+                employeeContent = { EmployeeDashboard(onNavigate) },
+                payrollContent = {PayrollOfficerDashboard(onNavigate)}
+            )
+        }
     }
 }
 
 // --- Specific Dashboard UIs ---
 
 @Composable
-fun EmployeeDashboard() {
+fun PayrollOfficerDashboard(onNavigate: (Screen) -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+
+        // Quick Stats Section for Payroll Officer
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            StatsCard(
+                title = "Next Pay Date",
+                value = "Oct 30",
+                modifier = Modifier.weight(1f)
+            )
+            StatsCard(
+                title = "Pending Issues",
+                value = "4",
+                modifier = Modifier.weight(1f),
+                isAlert = true
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "Payroll Management",
+            style = MaterialTheme.typography.titleMedium
+        )
+
+        DashboardCard(
+            title = "Process Payroll",
+            content = "Run the bi-weekly payroll batch calculation.",
+            onClick = { onNavigate(Screen.PayrollProcessing) }
+        )
+        DashboardCard(
+            title = "Verify Timesheets",
+            content = "Review approved overtime and shift differentials.",
+            onClick = { onNavigate(Screen.Schedule) }
+        )
+        DashboardCard(
+            title = "Tax & Compliance",
+            content = "Generate BIR 2316 and other tax reports.",
+            onClick = { onNavigate(Screen.Notification) }
+        )
+        DashboardCard(
+            title = "Employee Salary Adjustments",
+            content = "Manage bonuses, deductions, and basic pay rates.",
+            onClick = { onNavigate(Screen.Profile) }
+        )
+    }
+}
+
+@Composable
+fun EmployeeDashboard(onNavigate: (Screen) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Text(
             text = "Your Tools",
             style = MaterialTheme.typography.titleMedium
         )
-        DashboardCard(title = "My Schedule", content = "View your upcoming shifts.")
-        DashboardCard(title = "My Payslips", content = "Access your pay history.")
-        DashboardCard(title = "File a Leave", content = "Submit a request for time off.")
+        DashboardCard(
+            title = "My Schedule",
+            content = "View your upcoming shifts.",
+            onClick = { onNavigate(Screen.Schedule) }
+        )
+        DashboardCard(
+            title = "My Payslips",
+            content = "Access your pay history.",
+            onClick = { onNavigate(Screen.Payslip) }
+        )
+        DashboardCard(
+            title = "File a Leave",
+            content = "Submit a request for time off.",
+            onClick = { onNavigate(Screen.Leave) }
+        )
     }
 }
 
 @Composable
-fun ManagerDashboard() {
+fun ManagerDashboard(onNavigate: (Screen) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         // Managers see their own tools first
-        EmployeeDashboard()
+        EmployeeDashboard(onNavigate)
 
         // Then they see manager-specific tools
         Spacer(modifier = Modifier.height(16.dp))
@@ -238,16 +293,24 @@ fun ManagerDashboard() {
             text = "Manager Tools",
             style = MaterialTheme.typography.titleMedium
         )
-        DashboardCard(title = "Team Schedule", content = "View your team's calendar.")
-        DashboardCard(title = "Approve Requests", content = "Manage leave and overtime.")
+        DashboardCard(
+            title = "Team Schedule",
+            content = "View your team's calendar.",
+            onClick = { onNavigate(Screen.Schedule) }
+        )
+        DashboardCard(
+            title = "Approve Requests",
+            content = "Manage leave and overtime.",
+            onClick = { onNavigate(Screen.Leave) }
+        )
     }
 }
 
 @Composable
-fun AdminDashboard() {
+fun AdminDashboard(onNavigate: (Screen) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         // Admins see all tools
-        ManagerDashboard()
+        ManagerDashboard(onNavigate)
 
         // Then they see admin-specific tools
         Spacer(modifier = Modifier.height(16.dp))
@@ -255,10 +318,18 @@ fun AdminDashboard() {
             text = "Admin Tools",
             style = MaterialTheme.typography.titleMedium
         )
-        DashboardCard(title = "Manage Users", content = "Add or remove employees.")
-        DashboardCard(title = "System Settings", content = "Configure app-wide settings.")
+        DashboardCard(
+            title = "Manage Users",
+            content = "Add or remove employees.",
+            onClick = { onNavigate(Screen.Profile) } // Mapped to Profile for now
+        )
+        DashboardCard(
+            title = "System Settings",
+            content = "Configure app-wide settings.",
+            onClick = { onNavigate(Screen.Notification) } // Placeholder mapping
+        )
 
-        val context  =  LocalContext.current
+        val context = LocalContext.current
         // Add the test button here
         Button(onClick = { sendTestNotification(context) }) {
             Text("Send Test Notification")
@@ -270,9 +341,11 @@ fun AdminDashboard() {
  * A simple, reusable Card for dashboard items.
  */
 @Composable
-fun DashboardCard(title: String, content: String) {
+fun DashboardCard(title: String, content: String, onClick: () -> Unit) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick), // Make the entire card clickable
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -285,6 +358,36 @@ fun DashboardCard(title: String, content: String) {
             Text(
                 text = content,
                 style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    }
+}
+
+/**
+ * A mini card for displaying statistics (e.g., Next Pay Date).
+ */
+@Composable
+fun StatsCard(title: String, value: String, modifier: Modifier = Modifier, isAlert: Boolean = false) {
+    Card(
+        modifier = modifier,
+        colors = CardDefaults.cardColors(
+            containerColor = if (isAlert) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            horizontalAlignment = Alignment.Start
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.labelMedium,
+                color = if (isAlert) MaterialTheme.colorScheme.onErrorContainer else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = value,
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                color = if (isAlert) MaterialTheme.colorScheme.onErrorContainer else MaterialTheme.colorScheme.onSurface
             )
         }
     }

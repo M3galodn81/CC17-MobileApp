@@ -6,5 +6,6 @@ package com.example.essence.data.model
 enum class UserRole {
     EMPLOYEE,
     MANAGER,
-    ADMIN // You might have an admin role
+    ADMIN ,
+    PAYROLL_OFFICER
 }
